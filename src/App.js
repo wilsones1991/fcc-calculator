@@ -1,7 +1,6 @@
 import './App.css';
-import { useState } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { evaluate } from 'mathjs'
-
 
 function App() {
 
@@ -20,94 +19,127 @@ function Calculator(props) {
   // *** STATE CONSTANTS ***
   const [bottomDisplay, setBottomDisplay] = useState("0")
   const [topDisplay, setTopDisplay] = useState("")
-  
+  const [keyPressed, setKeyPressed] = useState("")
+  const [keyToggled, toggleKey] = useState(true)
+
   // *** REGEX CONSTANTS ***
 
   // Test for operator anywhere in string
-  const REGEX_OPERATOR_PRESENT = /[+\-x/]/
-  
-  // *** EVENT HANDLERS ***
+  const REGEX_OPERATOR_PRESENT = useMemo(() => /[+\-x/]/, [])
+
+// *** EVENT HANDLERS ***
 
   // Handle decimal click
-  const onDecClick = () => {
+  const onDecClick = useCallback(() => {
     if (bottomDisplay.indexOf(".") === -1 && !REGEX_OPERATOR_PRESENT.test(bottomDisplay)) {
       setBottomDisplay(bottomDisplay + ".")
       setTopDisplay(topDisplay + ".")
     }
-  }
-
+  },[REGEX_OPERATOR_PRESENT, bottomDisplay, topDisplay])
 
   // Handle all clear click
-  const onClearClick = () => {
+  const onClearClick = useCallback(() => {
     setBottomDisplay("0")
     setTopDisplay("")
-  }
+  },[])
     
   // Handle equals click
-  const onEqualsClick = () => {
+  const onEqualsClick = useCallback(() => {
     if (!isNaN(bottomDisplay)) {
       const solution = evaluate(topDisplay)
-      
       setBottomDisplay(solution)
       setTopDisplay(topDisplay + " = " + solution)
     }
-  }
+  },[topDisplay, bottomDisplay])
+
+  useEffect( () => {
+    document.addEventListener('keydown', (e) => {
+      toggleKey(keyToggled => !keyToggled)
+      setKeyPressed(e.key)
+    })
+    return document.removeEventListener('keydown', e => {
+    toggleKey(keyToggled => !keyToggled)
+    setKeyPressed(e.key)
+    })
+  }, [])
+
+  useEffect( () => {
+  }, [keyToggled])
+
+  useEffect( () => {
+    switch (keyPressed) {
+      case ".":
+        onDecClick()
+        break
+      case "Backspace":
+        onClearClick()
+        break
+      case "=":
+      case "Enter":
+        onEqualsClick()
+        break
+      default:
+        break
+    }
+  }, [keyPressed, keyToggled])
+
 
   return (
+    
     <div className="calculator">
-
       {/* Display component at top of calculator */}
       <Display topDisplay={topDisplay} bottomDisplay={bottomDisplay} />
       
       {/* All clear button - only one so not rendered as component */}
+      
       <button id="clear" className="clear button" onClick={()=>onClearClick()}>AC</button>
       
       {/* Division button */}
-      <Operator id="divide" text="/" operator="/" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <Operator id="divide" text="/" operator="/" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} setKeyPressed={setKeyPressed} />
 
       {/* Multiplication button */}
-      <Operator id="multiply" text="x" operator="x" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <Operator id="multiply" text="x" operator="x" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} setKeyPressed={setKeyPressed} />
 
       {/* Seven button */}
-      <NumButton id="seven" text="7" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <NumButton id="seven" text="7" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} />
 
       {/* Eight button */}
-      <NumButton id="eight" text="8" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <NumButton id="eight" text="8" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} />
 
       {/* Nine button */}
-      <NumButton id="nine" text="9" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <NumButton id="nine" text="9" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} />
 
       {/* Subtraction button */}
-      <Operator id="subtract" text="&minus;" operator="-" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <Operator id="subtract" text="&minus;" operator="-" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} setKeyPressed={setKeyPressed} />
 
       {/* Four button */}
-      <NumButton id="four" text="4" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <NumButton id="four" text="4" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} />
 
       {/* Five button */}
-      <NumButton id="five" text="5" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <NumButton id="five" text="5" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} />
 
       {/* Six button */}
-      <NumButton id="six" text="6" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <NumButton id="six" text="6" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} />
 
       {/* Addition button */}
-      <Operator id="add" text="+" operator="+" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <Operator id="add" text="+" operator="+" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} setKeyPressed={setKeyPressed} />
 
       {/* One button */}
-      <NumButton id="one" text="1" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <NumButton id="one" text="1" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} />
 
       {/* Two button */}
-      <NumButton id="two" text="2" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <NumButton id="two" text="2" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} />
 
       {/* Three button */}
-      <NumButton id="three" text="3" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <NumButton id="three" text="3" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} />
 
       {/* Equals button - not a component because only one */}
       <button id="equals" className="equals button" onClick={()=>onEqualsClick()}>=</button>
 
       {/* Zero button */}
-      <NumButton id="zero" text="0" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} />
+      <NumButton id="zero" text="0" topDisplay={topDisplay} bottomDisplay={bottomDisplay} setTopDisplay={setTopDisplay} setBottomDisplay={setBottomDisplay} keyPressed={keyPressed} keyToggled={keyToggled} />
 
-      {/* Equals button */}
+      {/* Decimal button */}
       <button id="decimal" className="number button" onClick={()=>onDecClick()}>.</button>
     </div>
   )
@@ -128,24 +160,24 @@ function Display(props) {
   )
 }
 
-function NumButton(props) {
-  
+function NumButton( { bottomDisplay, topDisplay, setBottomDisplay, setTopDisplay, id, text, keyPressed, keyToggled } ) {
+
   // save props as constants for easier reference
-  const bottomDisplay = props.bottomDisplay
-  const topDisplay = props.topDisplay
-  const setBottomDisplay = props.setBottomDisplay
-  const setTopDisplay = props.setTopDisplay
+  // const bottomDisplay = props.bottomDisplay
+  // const topDisplay = props.topDisplay
+  // const setBottomDisplay = props.setBottomDisplay
+  // const setTopDisplay = props.setTopDisplay
 
   // Regex tests
 
   // Test for any operator at the end of string
-  const REGEX_ANY_OPERATOR_AT_END = /[+\-x/]$/
+  const REGEX_ANY_OPERATOR_AT_END = useMemo(() => /[+\-x/]$/,[])
   // Test for operator followed by a negative symbol
-  const REGEX_OPERATOR_THEN_NEGATIVE = /([+\-*/] -)$/
+  const REGEX_OPERATOR_THEN_NEGATIVE = useMemo(() => /([+\-*/] -)$/,[])
 
   // Handle number clicks. Takes in the current digit being passed as a string.
   const onNumClick = (digit) => {
-    
+
     // If the bottom display is 0, then no matter what number is entered, we want both the bottom and top display to display only that digit.
 
     // If the top display contains an equals sign, that means a solution has been calculated, and if a user enters a digit, then we want to clear the previous equation and start building a new equation. In that case, we also only want to display the digit in the top and bottom displays.
@@ -176,8 +208,14 @@ function NumButton(props) {
     setTopDisplay(topDisplay + digit)
   }
 
+  useEffect(() => {
+    if (!isNaN(keyPressed)) {
+      onNumClick(keyPressed)
+    }
+  }, [keyPressed, keyToggled])
+
   return (
-      <button id={props.id} className={"number button " + props.id} onClick={()=>onNumClick(props.text)}>{props.text}</button>
+      <button id={id} className={"number button " + id} onClick={()=>onNumClick(text)}>{text}</button>
   )
 }
 
@@ -246,7 +284,17 @@ function Operator(props) {
       setTopDisplay(topDisplay + " " + operator + " ")
       return
     }
+
+  }
+
+  useEffect(() => {
+    if (/[+\-x/*]/.test(props.keyPressed)) {
+      if (props.keyPressed === "*") {
+        props.setKeyPressed("x")
+      }
+      onOperatorClick(props.keyPressed)
     }
+  },[props.keyPressed, props.keyToggled])
 
     return(
       <button id={props.id} className="operator button" onClick={()=>onOperatorClick(props.operator)}>{props.text}</button>
